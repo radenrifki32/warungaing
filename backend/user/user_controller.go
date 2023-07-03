@@ -2,7 +2,6 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -10,6 +9,10 @@ import (
 	"github.com/rifki321/warungku/user/web"
 )
 
+type ErrorResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
 type UserController interface {
 	Register(w http.ResponseWriter, r *http.Request, params httprouter.Params)
 	Login(w http.ResponseWriter, r *http.Request, params httprouter.Params)
@@ -23,43 +26,44 @@ func NewUserController(service UserService) UserController {
 	return &UserControllerImpl{service: service}
 }
 func (controller *UserControllerImpl) Register(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	RegisterRequest := &web.RegisterRequest{}
+	registerRequest := web.RegisterRequest{}
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(RegisterRequest)
+	err := decoder.Decode(&registerRequest)
 	if err != nil {
-		panic(err)
+		helper.Response(w, http.StatusInternalServerError, "INTERNAL SERVER ERROR", nil)
+		return
 	}
 
-	UserResponse := controller.service.Register(r.Context(), *RegisterRequest)
-
-	webResponse := web.ResponseWeb{
-		Code:   200,
-		Status: "Ok",
-		Data:   UserResponse,
+	userResponse, err := controller.service.Register(r.Context(), registerRequest)
+	if err != nil {
+		helper.Response(w, http.StatusBadRequest, err.Error(), nil)
+		return
 	}
-	fmt.Println(webResponse)
-	WriteFromJsonBody(w, webResponse)
+
+	helper.Response(w, http.StatusCreated, "Success", userResponse)
 
 }
 func (controller *UserControllerImpl) Login(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	RegisterRequest := &web.RegisterRequest{}
+	loginRequest := web.LoginRequest{}
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(RegisterRequest)
+	err := decoder.Decode(&loginRequest)
 	if err != nil {
-		fmt.Println("Decode Not Valid")
+		helper.Response(w, http.StatusInternalServerError, err.Error(), nil)
+		return
 	}
-	fmt.Println(&RegisterRequest.Username)
-	helper.LogBody(w, r)
 
-	UserResponse := controller.service.Login(r.Context(), *RegisterRequest)
-
-	webResponse := web.ResponseWeb{
-		Code:   200,
-		Status: "Ok",
-		Data:   UserResponse,
+	if loginRequest.Username == "" || loginRequest.Password == "" {
+		helper.Response(w, http.StatusBadRequest, "Username atau Password tidak boleh kosong", nil)
+		return
 	}
-	WriteFromJsonBody(w, webResponse)
 
+	userResponse, err := controller.service.Login(r.Context(), loginRequest, w)
+	if err != nil {
+		helper.Response(w, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+
+	helper.Response(w, http.StatusOK, "Success", userResponse)
 }
 
 func WriteFromJsonBody(w http.ResponseWriter, response interface{}) {

@@ -14,7 +14,7 @@ func internalServerError(w http.ResponseWriter, r *http.Request, err interface{}
 	w.WriteHeader(http.StatusInternalServerError)
 	responseWeb := ResponseWeb{
 		Code:   http.StatusInternalServerError,
-		Status: "INTERNAL SERVER ERROR",
+		Status: false,
 		Data:   err,
 	}
 	WriteFromJsonBody(w, responseWeb)
@@ -28,7 +28,7 @@ func notFoundError(w http.ResponseWriter, r *http.Request, err interface{}) bool
 		w.WriteHeader(http.StatusNotFound)
 		responseWeb := ResponseWeb{
 			Code:   http.StatusNotFound,
-			Status: "INTERNAL SERVER ERROR",
+			Status: false,
 			Data:   exception.Error,
 		}
 		WriteFromJsonBody(w, responseWeb)

@@ -3,7 +3,6 @@ package product
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"net/http"
 
 	"github.com/rifki321/warungku/helper"
@@ -50,7 +49,6 @@ func (service *ProductServiceImpl) GetProductById(ctx context.Context, w http.Re
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(ProductId)
 
 	product, err := service.repo.GetProductById(ctx, tx, ProductId)
 	if err != nil {
@@ -66,6 +64,7 @@ func (service *ProductServiceImpl) PostProduct(ctx context.Context, w http.Respo
 	}
 	defer helper.CommitOrRollback(tx)
 	product := ProductEntity{
+		Id:           r.Id,
 		NamaProduct:  r.NamaProduct,
 		HargaProduct: r.HargaProduct,
 		Quantity:     r.Quantity,
@@ -94,10 +93,8 @@ func (service *ProductServiceImpl) UpdateProduct(ctx context.Context, w http.Res
 	}
 	defer helper.CommitOrRollback(tx)
 
-	fmt.Println("product", r.Id)
 	product, err := service.repo.GetProductById(ctx, tx, r.Id)
 	if err != nil {
-		fmt.Println(err)
 	}
 	product = ProductEntity{
 		Id:           r.Id,
@@ -121,7 +118,6 @@ func (service *ProductServiceImpl) GetProductByCategories(ctx context.Context) [
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(product)
 	return ToResponseProductsWithCategory(product)
 
 }
@@ -136,7 +132,6 @@ func (service *ProductServiceImpl) GetProductByCategoriesId(ctx context.Context,
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(product)
 	return ToResponseProductsWithCategory(product)
 
 }

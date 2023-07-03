@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/rifki321/warungku/helper"
 	"github.com/rifki321/warungku/product/webproduct"
 	"github.com/rifki321/warungku/user/web"
 )
@@ -31,12 +32,7 @@ func NewProductController(service ProductService) *ProductControllerImpl {
 
 func (service *ProductControllerImpl) GetAllProduct(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	ResponseProduct := service.service.GetAllProduct(r.Context(), w)
-	webResponse := web.ResponseWeb{
-		Code:   http.StatusOK,
-		Status: "Ok",
-		Data:   ResponseProduct,
-	}
-	WriteFromJsonBody(w, webResponse)
+	helper.Response(w, http.StatusOK, "OK", ResponseProduct)
 
 }
 func (controller *ProductControllerImpl) GetProductById(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -48,7 +44,7 @@ func (controller *ProductControllerImpl) GetProductById(w http.ResponseWriter, r
 	ResponseProduct := controller.service.GetProductById(r.Context(), w, int32(id))
 	webResponse := web.ResponseWeb{
 		Code:   http.StatusOK,
-		Status: "Ok",
+		Status: true,
 		Data:   ResponseProduct,
 	}
 	WriteFromJsonBody(w, webResponse)
@@ -97,7 +93,7 @@ func (controller *ProductControllerImpl) UpdateProduct(w http.ResponseWriter, r 
 
 	webResponse := web.ResponseWeb{
 		Code:   200,
-		Status: "Ok",
+		Status: true,
 		Data:   product,
 	}
 	fmt.Println(product)
@@ -113,7 +109,7 @@ func (controller *ProductControllerImpl) GetProductByCategoriesId(w http.Respons
 	responseProduct := controller.service.GetProductByCategoriesId(r.Context(), categoryId)
 	responseWeb := web.ResponseWeb{
 		Code:   200,
-		Status: "OK",
+		Status: true,
 		Data:   responseProduct,
 	}
 	WriteFromJsonBody(w, responseWeb)
@@ -123,7 +119,7 @@ func (controller *ProductControllerImpl) GetProductByCategories(w http.ResponseW
 	responseProduct := controller.service.GetProductByCategories(r.Context())
 	responseWeb := web.ResponseWeb{
 		Code:   200,
-		Status: "OK",
+		Status: true,
 		Data:   responseProduct,
 	}
 	WriteFromJsonBody(w, responseWeb)
